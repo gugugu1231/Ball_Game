@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字猜谜游戏</title>
+    <title>数字猜谜游戏 - 增强版</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -75,7 +75,7 @@
             color: #333;
             font-weight: bold;
         }
-        .attempts, .timer {
+        .attempts, .timer, .score {
             margin-top: 10px;
             font-size: 18px;
             color: #888;
@@ -106,6 +106,20 @@
             color: #fff;
             z-index: 3;
         }
+        .difficulty {
+            margin-bottom: 20px;
+        }
+        .difficulty button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .hint {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #007bff;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -113,21 +127,66 @@
 <div class="background"></div>
 <div class="author">作者：咕咕(微信：19551599739)</div>
 <div class="container">
-    <h1>数字猜谜Game</h1>
-    <p>我已经想好了一个1到100之间的数字，你能在60秒内猜出来吗？</p>
+    <h1>数字猜谜游戏 - 增强版</h1>
+    <div class="difficulty">
+        <button onclick="setDifficulty('easy')">简单 (1-50)</button>
+        <button onclick="setDifficulty('medium')">中等 (1-100)</button>
+        <button onclick="setDifficulty('hard')">困难 (1-200)</button>
+    </div>
+    <p id="rangeText">我已经想好了一个1到100之间的数字，你能在60秒内猜出来吗？</p>
     <input type="number" id="guessInput" min="1" max="100" placeholder="输入你的猜测">
     <button onclick="checkGuess()">提交</button>
+    <p class="hint" onclick="useHint()">使用提示（消耗10积分）</p>
     <p class="message" id="message"></p>
     <p class="attempts" id="attempts">尝试次数：0</p>
     <p class="timer" id="timer">剩余时间：60秒</p>
+    <p class="score" id="score">当前积分：0 | 历史最高分：0</p>
 </div>
 
 <script>
-    // 生成一个1到100之间的随机数
-    const randomNumber = Math.floor(Math.random() * 100) + 1;
+    let randomNumber;
     let attempts = 0;
     let timeLeft = 60;
     let timerInterval;
+    let score = 0;
+    let highScore = 0;
+    let rangeMin = 1;
+    let rangeMax = 100;
+    let hintUsed = false;
+
+    // 设置难度
+    function setDifficulty(difficulty) {
+        if (difficulty === 'easy') {
+            rangeMin = 1;
+            rangeMax = 50;
+            timeLeft = 60;
+        } else if (difficulty === 'medium') {
+            rangeMin = 1;
+            rangeMax = 100;
+            timeLeft = 60;
+        } else if (difficulty === 'hard') {
+            rangeMin = 1;
+            rangeMax = 200;
+            timeLeft = 45;
+        }
+        document.getElementById('rangeText').textContent = `我已经想好了一个${rangeMin}到${rangeMax}之间的数字，你能在${timeLeft}秒内猜出来吗？`;
+        startGame();
+    }
+
+    // 启动游戏
+    function startGame() {
+        randomNumber = Math.floor(Math.random() * (rangeMax - rangeMin + 1)) + rangeMin;
+        attempts = 0;
+        hintUsed = false;
+        document.getElementById('attempts').textContent = `尝试次数：${attempts}`;
+        document.getElementById('timer').textContent = `剩余时间：${timeLeft}秒`;
+        document.getElementById('message').textContent = '';
+        document.getElementById('guessInput').value = '';
+        document.getElementById('guessInput').disabled = false;
+        document.querySelector('button').disabled = false;
+        clearInterval(timerInterval);
+        startTimer();
+    }
 
     // 启动倒计时
     function startTimer() {
@@ -143,15 +202,15 @@
         }, 1000);
     }
 
-    // 检查猜测的函数
+    // 检查猜测
     function checkGuess() {
         const guessInput = document.getElementById('guessInput');
         const guess = parseInt(guessInput.value);
         const message = document.getElementById('message');
         const attemptsDisplay = document.getElementById('attempts');
 
-        if (isNaN(guess) || guess < 1 || guess > 100) {
-            message.textContent = "请输入一个1到100之间的有效数字！";
+        if (isNaN(guess) || guess < rangeMin || guess > rangeMax) {
+            message.textContent = `请输入一个${rangeMin}到${rangeMax}之间的有效数字！`;
             guessInput.classList.add('error');
             return;
         }
@@ -168,18 +227,37 @@
             guessInput.classList.add('error');
             guessInput.classList.remove('success');
         } else {
+            const points = timeLeft * 10 - attempts * 5;
+            score += points;
+            if (score > highScore) highScore = score;
+            document.getElementById('score').textContent = `当前积分：${score} | 历史最高分：${highScore}`;
             message.textContent = `恭喜你！你猜对了！数字是 ${randomNumber}。`;
             guessInput.classList.add('success');
             guessInput.classList.remove('error');
             guessInput.disabled = true;
             document.querySelector('button').disabled = true;
-            clearInterval(timerInterval); // 停止倒计时
-            playSound('success.mp3'); // 播放成功音效
+            clearInterval(timerInterval);
+            playSound('success.mp3');
         }
 
         // 清空输入框
         guessInput.value = '';
         guessInput.focus();
+    }
+
+    // 使用提示
+    function useHint() {
+        if (score >= 10 && !hintUsed) {
+            score -= 10;
+            hintUsed = true;
+            const isEven = randomNumber % 2 === 0;
+            document.getElementById('message').textContent = `提示：数字是${isEven ? '偶数' : '奇数'}。`;
+            document.getElementById('score').textContent = `当前积分：${score} | 历史最高分：${highScore}`;
+        } else if (hintUsed) {
+            document.getElementById('message').textContent = "提示已使用！";
+        } else {
+            document.getElementById('message').textContent = "积分不足！";
+        }
     }
 
     // 播放音效
@@ -195,8 +273,8 @@
         }
     });
 
-    // 启动游戏
-    startTimer();
+    // 初始化游戏
+    setDifficulty('medium');
 </script>
 
 </body>
