@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字猜谜游戏 - 增强版</title>
+    <title>数字猜谜Game - 增强版</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -120,14 +120,19 @@
             color: #007bff;
             cursor: pointer;
         }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
 <div class="background"></div>
-<div class="author">作者：咕咕(微信：19551599739)</div>
+<div class="author">咕咕(微信19551599739)</div>
 <div class="container">
-    <h1>数字猜谜游戏 - 增强版</h1>
+    <h1>数字猜谜Game - 增强版</h1>
     <div class="difficulty">
         <button onclick="setDifficulty('easy')">简单 (1-50)</button>
         <button onclick="setDifficulty('medium')">中等 (1-100)</button>
@@ -153,6 +158,29 @@
     let rangeMin = 1;
     let rangeMax = 100;
     let hintUsed = false;
+
+    // 成就系统
+    const achievements = {
+        firstWin: { unlocked: false, message: '成就：首次胜利！' },
+        tenWins: { unlocked: false, message: '成就：猜对10次！' },
+        fiveHints: { unlocked: false, message: '成就：使用提示5次！' },
+    };
+
+    // 关卡模式
+    const levels = [
+        { rangeMin: 1, rangeMax: 50, time: 60 },
+        { rangeMin: 1, rangeMax: 100, time: 60 },
+        { rangeMin: 1, rangeMax: 200, time: 45 },
+    ];
+    let currentLevel = 0;
+
+    // 多人模式
+    let multiplayer = false;
+    let players = [
+        { name: '玩家1', score: 0 },
+        { name: '玩家2', score: 0 },
+    ];
+    let currentPlayer = 0;
 
     // 设置难度
     function setDifficulty(difficulty) {
@@ -199,6 +227,10 @@
                 document.getElementById('guessInput').disabled = true;
                 document.querySelector('button').disabled = true;
             }
+            if (timeLeft <= 10) {
+                document.getElementById('timer').style.color = 'red';
+                document.getElementById('timer').style.animation = 'blink 1s infinite';
+            }
         }, 1000);
     }
 
@@ -238,11 +270,18 @@
             document.querySelector('button').disabled = true;
             clearInterval(timerInterval);
             playSound('success.mp3');
+            checkAchievements();
+            if (!multiplayer) nextLevel();
         }
 
         // 清空输入框
         guessInput.value = '';
         guessInput.focus();
+
+        // 随机事件
+        if (Math.random() < 0.2) { // 20% 触发概率
+            triggerRandomEvent();
+        }
     }
 
     // 使用提示
@@ -258,6 +297,58 @@
         } else {
             document.getElementById('message').textContent = "积分不足！";
         }
+    }
+
+    // 随机事件
+    function triggerRandomEvent() {
+        const events = [
+            { type: 'time', value: 10, message: '幸运事件：时间+10秒！' },
+            { type: 'hint', value: 1, message: '幸运事件：获得1次免费提示！' },
+        ];
+        const event = events[Math.floor(Math.random() * events.length)];
+        if (event.type === 'time') {
+            timeLeft += event.value;
+            document.getElementById('timer').textContent = `剩余时间：${timeLeft}秒`;
+        } else if (event.type === 'hint') {
+            score += 10; // 相当于免费提示
+            document.getElementById('score').textContent = `当前积分：${score} | 历史最高分：${highScore}`;
+        }
+        document.getElementById('message').textContent = event.message;
+    }
+
+    // 成就系统
+    function checkAchievements() {
+        if (score >= 100 && !achievements.firstWin.unlocked) {
+            achievements.firstWin.unlocked = true;
+            document.getElementById('message').textContent = achievements.firstWin.message;
+        }
+        if (attempts >= 10 && !achievements.tenWins.unlocked) {
+            achievements.tenWins.unlocked = true;
+            document.getElementById('message').textContent = achievements.tenWins.message;
+        }
+        if (hintUsed >= 5 && !achievements.fiveHints.unlocked) {
+            achievements.fiveHints.unlocked = true;
+            document.getElementById('message').textContent = achievements.fiveHints.message;
+        }
+    }
+
+    // 关卡模式
+    function nextLevel() {
+        if (currentLevel < levels.length - 1) {
+            currentLevel++;
+            rangeMin = levels[currentLevel].rangeMin;
+            rangeMax = levels[currentLevel].rangeMax;
+            timeLeft = levels[currentLevel].time;
+            startGame();
+        } else {
+            document.getElementById('message').textContent = '恭喜你，通关所有关卡！';
+        }
+    }
+
+    // 多人模式
+    function switchPlayer() {
+        currentPlayer = (currentPlayer + 1) % players.length;
+        document.getElementById('message').textContent = `${players[currentPlayer].name}，轮到你了！`;
     }
 
     // 播放音效
