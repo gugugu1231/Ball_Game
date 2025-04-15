@@ -299,7 +299,7 @@
         }
         #helpButton {
             position: absolute;
-            bottom: 20px;
+            bottom: 90px;
             right: 20px;
             width: 50px;
             height: 50px;
@@ -540,6 +540,10 @@
             align-items: center;
             gap: 15px;
         }
+        .control-row {
+            display: flex;
+            gap: 15px;
+        }
         .control-btn {
             width: 60px;
             height: 60px;
@@ -591,6 +595,9 @@
             #controlArea {
                 display: none;
             }
+            #helpButton {
+                bottom: 20px;
+            }
         }
     </style>
 </head>
@@ -626,7 +633,7 @@
                 <div class="control-btn" id="upBtn">↑</div>
                 <div class="control-btn" id="downBtn">↓</div>
             </div>
-            <div class="control-column">
+            <div class="control-row">
                 <div class="control-btn" id="leftBtn">←</div>
                 <div class="control-btn" id="rightBtn">→</div>
             </div>
