@@ -299,7 +299,7 @@
         }
         #helpButton {
             position: absolute;
-            bottom: 20px;
+            bottom: 90px;
             right: 20px;
             width: 50px;
             height: 50px;
@@ -744,8 +744,6 @@
         const downBtn = document.getElementById('downBtn');
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
-        let gameLoopRunning = false;  // 新增这行
-        let lastTime = 0;
         
         // 控制变量
         let playerX = 50;
@@ -780,6 +778,8 @@
         let totalScore = 0;
         let enemyAttackCooldown = 0;
         let gameStarted = false;
+        let gameLoopRunning = false;
+        let lastTime = 0;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         // 颜色名称映射
@@ -807,16 +807,7 @@
                 speed: false,
                 magnet: false
             };
-            // 确保游戏循环状态正确（新增这部分）
-            gameLoopRunning = true;
-            lastTime = performance.now();
-
-            // 重置游戏循环（新增这部分）
-            lastTime = 0;
-            if (!gameLoopRunning) {
-            gameLoopRunning = true;
-            requestAnimationFrame(gameLoop);
-            }
+            
             updatePlayerPosition();
             updateHealthDisplay();
             updateScoreDisplay();
@@ -837,6 +828,10 @@
                 left: false,
                 right: false
             };
+            
+            // 确保游戏循环状态正确
+            gameLoopRunning = true;
+            lastTime = performance.now();
             
             // 隐藏所有模态框
             welcomeModal.style.display = 'none';
@@ -908,8 +903,8 @@
             
             // 更新关卡信息
             levelInfo.textContent = `关卡: ${currentLevel}`;
-            requiredScore = 5 + currentLevel * 2; // 每关增加2个需求
-            score = 0; // 重置当前关卡得分
+            requiredScore = 5 + currentLevel * 2;
+            score = 0;
             updateProgressDisplay();
             
             // 设置目标颜色
@@ -918,46 +913,37 @@
             player.style.background = `linear-gradient(135deg, ${currentTargetColor}, ${darkenColor(currentTargetColor, 20)})`;
             targetText.textContent = `收集${colorNames[currentTargetColor]}球`;
             
-            // 创建游戏元素 - 确保至少有足够的目标球
+            // 创建游戏元素
             const totalBalls = 15 + currentLevel * 5;
-            const targetBalls = Math.max(requiredScore, Math.floor(totalBalls * 0.4)); // 至少40%是目标球
+            const targetBalls = Math.max(requiredScore, Math.floor(totalBalls * 0.4));
             
             createBalls(totalBalls, targetBalls);
             
-            // 从第二关开始添加墙
             if (currentLevel > 1) {
                 createWalls(currentLevel + 2);
             }
             
-            // 从第三关开始添加敌人
             if (currentLevel > 2) {
                 createEnemies(Math.floor(currentLevel / 2) + 2);
             }
             
-            // 从第四关开始添加能量球
             if (currentLevel > 3) {
                 createPowerUps(2);
             }
             
-            // 从第五关开始添加特殊球
             if (currentLevel > 4) {
                 createSpecialBalls(1);
             }
             
-            // 从第六关开始添加炸弹
             if (currentLevel > 5) {
                 createBombs(1 + Math.floor(currentLevel / 3));
             }
             
-            // 从第七关开始添加传送门
             if (currentLevel > 6) {
                 createPortals(2);
             }
             
-            // 调整玩家速度（随着关卡增加而变快）
             playerSpeed = 5 + currentLevel * 0.3;
-            
-            // 重置敌人攻击冷却
             enemyAttackCooldown = 0;
         }
         
@@ -999,14 +985,12 @@
             attackIndicators = [];
         }
 
-        // 创建球 - 确保有足够的目标球
+        // 创建球
         function createBalls(totalCount, targetCount) {
-            // 先创建目标球
             for (let i = 0; i < targetCount; i++) {
                 createBall(currentTargetColor);
             }
             
-            // 然后创建其他颜色的球
             for (let i = targetCount; i < totalCount; i++) {
                 const otherColors = colors.filter(c => c !== currentTargetColor);
                 const color = otherColors[Math.floor(Math.random() * otherColors.length)];
@@ -1019,7 +1003,6 @@
             const ball = document.createElement('div');
             ball.className = 'ball';
             
-            // 随机位置（确保不会与玩家重叠）
             let x, y;
             do {
                 x = Math.random() * (gameWidth - 40) + 20;
@@ -1046,7 +1029,6 @@
                 const wall = document.createElement('div');
                 wall.className = 'wall';
                 
-                // 随机位置和大小
                 const isVertical = Math.random() < 0.5;
                 const length = Math.random() * 100 + 50;
                 const thickness = 15;
@@ -1083,7 +1065,6 @@
                 const enemy = document.createElement('div');
                 enemy.className = 'enemy';
                 
-                // 随机位置（确保不会与玩家重叠）
                 let x, y;
                 do {
                     x = Math.random() * (gameWidth - 40) + 20;
@@ -1110,7 +1091,6 @@
                 const powerUp = document.createElement('div');
                 powerUp.className = 'powerUp';
                 
-                // 随机位置
                 const x = Math.random() * (gameWidth - 40) + 20;
                 const y = Math.random() * (gameHeight - 40) + 20;
                 
@@ -1133,7 +1113,6 @@
                 const specialBall = document.createElement('div');
                 specialBall.className = 'special-ball';
                 
-                // 随机位置
                 const x = Math.random() * (gameWidth - 40) + 20;
                 const y = Math.random() * (gameHeight - 40) + 20;
                 
@@ -1156,7 +1135,6 @@
                 const portal = document.createElement('div');
                 portal.className = 'portal';
                 
-                // 随机位置
                 const x = Math.random() * (gameWidth - 60) + 30;
                 const y = Math.random() * (gameHeight - 60) + 30;
                 
@@ -1179,7 +1157,6 @@
                 const bomb = document.createElement('div');
                 bomb.className = 'bomb';
                 
-                // 随机位置
                 const x = Math.random() * (gameWidth - 40) + 20;
                 const y = Math.random() * (gameHeight - 40) + 20;
                 
@@ -1192,7 +1169,7 @@
                     element: bomb,
                     x: x,
                     y: y,
-                    timer: Math.random() * 5000 + 5000 // 5-10秒后爆炸
+                    timer: Math.random() * 5000 + 5000
                 });
             }
         }
@@ -1206,7 +1183,6 @@
             gameContainer.appendChild(explosion);
             explosions.push(explosion);
             
-            // 爆炸动画
             let scale = 0;
             const explosionInterval = setInterval(() => {
                 scale += 0.1;
@@ -1219,7 +1195,6 @@
                     explosions = explosions.filter(e => e !== explosion);
                 }
                 
-                // 检测玩家是否在爆炸范围内
                 const dx = playerX - x;
                 const dy = playerY - y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1240,20 +1215,16 @@
         function applyEffect(type, duration) {
             playerEffects[type] = true;
             
-            // 添加效果类
             if (type === 'shield') player.classList.add('shield');
             if (type === 'speed') player.classList.add('speed');
             
-            // 清除之前的计时器（如果存在）
             if (effectTimers[type]) {
                 clearTimeout(effectTimers[type]);
             }
             
-            // 设置效果持续时间
             effectTimers[type] = setTimeout(() => {
                 playerEffects[type] = false;
                 
-                // 移除效果类
                 if (type === 'shield') player.classList.remove('shield');
                 if (type === 'speed') player.classList.remove('speed');
             }, duration);
@@ -1269,7 +1240,7 @@
                     const dy = playerY - ball.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (distance < 200) { // 吸引范围
+                    if (distance < 200) {
                         const speed = 3;
                         const vx = (dx / distance) * speed;
                         const vy = (dy / distance) * speed;
@@ -1292,29 +1263,24 @@
                 const dy = playerY - ball.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance < 25) { // 碰撞距离
+                if (distance < 25) {
                     if (ball.color === currentTargetColor) {
-                        // 收集正确颜色的球
                         score++;
-                        totalScore += currentLevel * 15; // 关卡越高得分越高
+                        totalScore += currentLevel * 15;
                         updateProgressDisplay();
                         updateScoreDisplay();
                         
-                        // 检查是否完成关卡
                         if (score >= requiredScore) {
                             completeLevel();
                             return;
                         }
                     } else {
-                        // 收集错误颜色的球扣血
                         takeDamage();
                     }
                     
-                    // 移除球
                     ball.element.remove();
                     balls.splice(i, 1);
                     
-                    // 创建新球
                     createBall(Math.random() < 0.25 ? currentTargetColor : 
                         colors.filter(c => c !== currentTargetColor)[Math.floor(Math.random() * (colors.length - 1))]);
                 }
@@ -1328,15 +1294,13 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < 25) {
-                    // 随机获得一种能力
                     const effects = ['shield', 'speed', 'magnet'];
                     const effect = effects[Math.floor(Math.random() * effects.length)];
-                    applyEffect(effect, 5000); // 持续5秒
+                    applyEffect(effect, 5000);
                     
                     powerUp.element.remove();
                     powerUps.splice(i, 1);
                     
-                    // 创建新能量球
                     setTimeout(() => {
                         createPowerUps(1);
                     }, 10000);
@@ -1351,13 +1315,11 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < 25) {
-                    // 直接增加进度
                     score += 2;
                     totalScore += currentLevel * 30;
                     updateProgressDisplay();
                     updateScoreDisplay();
                     
-                    // 检查是否完成关卡
                     if (score >= requiredScore) {
                         completeLevel();
                         return;
@@ -1366,7 +1328,6 @@
                     specialBall.element.remove();
                     specialBalls.splice(i, 1);
                     
-                    // 创建新特殊球
                     setTimeout(() => {
                         createSpecialBalls(1);
                     }, 15000);
@@ -1380,13 +1341,11 @@
                 const dy = playerY - bomb.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance < 25) { // 碰撞距离
-                    // 立即引爆炸弹
+                if (distance < 25) {
                     createExplosion(bomb.x, bomb.y);
                     bomb.element.remove();
                     bombs.splice(i, 1);
                     
-                    // 创建新炸弹
                     setTimeout(() => {
                         createBombs(1);
                     }, 10000);
@@ -1401,7 +1360,6 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < 30) {
-                    // 传送到随机位置
                     playerX = Math.random() * (gameWidth - 40) + 20;
                     playerY = Math.random() * (gameHeight - 40) + 20;
                     updatePlayerPosition();
@@ -1411,39 +1369,34 @@
             
             // 检测墙碰撞
             for (let i = 0; i < walls.length; i++) {
-            const wall = walls[i];
-        
-        // 更精确的矩形碰撞检测
-            if (playerX + 16 > wall.x && 
-                playerX - 16 < wall.x + wall.width && 
-                playerY + 16 > wall.y && 
-                playerY - 16 < wall.y + wall.height) {
-            
-            // 计算玩家到墙中心的向量
-            const wallCenterX = wall.x + wall.width / 2;
-            const wallCenterY = wall.y + wall.height / 2;
-            const dx = playerX - wallCenterX;
-            const dy = playerY - wallCenterY;
-            
-            // 确定从哪个方向推出玩家
-            if (Math.abs(dx) > Math.abs(dy)) {
-                // 水平方向推出
-                if (dx > 0) {
-                    playerX = wall.x + wall.width + 16;
-                } else {
-                    playerX = wall.x - 16;
-                }
-            } else {
-                // 垂直方向推出
-                if (dy > 0) {
-                    playerY = wall.y + wall.height + 16;
-                } else {
-                    playerY = wall.y - 16;
+                const wall = walls[i];
+                
+                if (playerX + 16 > wall.x && 
+                    playerX - 16 < wall.x + wall.width && 
+                    playerY + 16 > wall.y && 
+                    playerY - 16 < wall.y + wall.height) {
+                    
+                    const wallCenterX = wall.x + wall.width / 2;
+                    const wallCenterY = wall.y + wall.height / 2;
+                    const dx = playerX - wallCenterX;
+                    const dy = playerY - wallCenterY;
+                    
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if (dx > 0) {
+                            playerX = wall.x + wall.width + 16;
+                        } else {
+                            playerX = wall.x - 16;
+                        }
+                    } else {
+                        if (dy > 0) {
+                            playerY = wall.y + wall.height + 16;
+                        } else {
+                            playerY = wall.y - 16;
+                        }
+                    }
+                    updatePlayerPosition();
                 }
             }
-            updatePlayerPosition();
-        }
-    }
             
             // 检测敌人碰撞
             for (let i = 0; i < enemies.length; i++) {
@@ -1453,12 +1406,10 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < 30 && !playerEffects.shield) {
-                    // 敌人攻击
                     if (enemyAttackCooldown <= 0) {
                         takeDamage();
-                        enemyAttackCooldown = 1000; // 攻击冷却1秒
+                        enemyAttackCooldown = 1000;
                         
-                        // 显示攻击指示器
                         const indicator = document.createElement('div');
                         indicator.className = 'attack-indicator';
                         indicator.style.left = `${enemy.x - 20}px`;
@@ -1480,13 +1431,12 @@
             enemyAttackCooldown -= deltaTime;
             
             enemies.forEach((enemy, index) => {
-                // 敌人追踪玩家
                 const dx = playerX - enemy.x;
                 const dy = playerY - enemy.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance > 0) {
-                    const speed = 0.9 + currentLevel * 0.1; // 敌人速度随关卡增加
+                    const speed = 1.0 + currentLevel * 0.1; // 降低敌人速度
                     const vx = (dx / distance) * speed;
                     const vy = (dy / distance) * speed;
                     
@@ -1496,7 +1446,6 @@
                     enemy.element.style.left = `${enemy.x}px`;
                     enemy.element.style.top = `${enemy.y}px`;
                     
-                    // 敌人攻击动画
                     enemy.attackTimer -= deltaTime;
                     if (enemy.attackTimer <= 0) {
                         enemy.element.classList.add('attacking');
@@ -1509,7 +1458,6 @@
                 }
             });
             
-            // 更新炸弹计时器
             bombs.forEach(bomb => {
                 bomb.timer -= deltaTime;
                 if (bomb.timer <= 0) {
@@ -1517,7 +1465,6 @@
                     bomb.element.remove();
                     bombs = bombs.filter(b => b !== bomb);
                     
-                    // 创建新炸弹
                     setTimeout(() => {
                         createBombs(1);
                     }, 10000);
@@ -1534,14 +1481,14 @@
                 levelComplete.style.display = 'none';
                 currentLevel++;
                 
-                if (currentLevel <= 15) { // 总共15关
+                if (currentLevel <= 15) {
                     startLevel();
                 } else {
-                    // 游戏完成
                     finalScoreDisplay2.textContent = totalScore;
                     finalScreen.style.display = 'flex';
                     clearInterval(timerInterval);
                     gameStarted = false;
+                    gameLoopRunning = false;
                 }
             }, 1500);
         }
@@ -1615,12 +1562,11 @@
             gameOverScreen.style.display = 'none';
             gameStarted = true;
             initGame();
-        // 确保游戏循环启动
-        if (!gameLoopRunning) {
-        gameLoopRunning = true;
-        lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
-        }
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
         });
         
         restartButton2.addEventListener('click', (e) => {
@@ -1628,12 +1574,11 @@
             finalScreen.style.display = 'none';
             gameStarted = true;
             initGame();
-         // 确保游戏循环启动
-        if (!gameLoopRunning) {
-        gameLoopRunning = true;
-        lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
-        }
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
         });
 
         // 开始游戏按钮
@@ -1641,25 +1586,21 @@
             e.preventDefault();
             welcomeModal.style.display = 'none';
             gameStarted = true;
-            gameLoopRunning = true;  // 新增这行
-            lastTime = performance.now();  // 新增这行
+            gameLoopRunning = true;
+            lastTime = performance.now();
             initGame();
-            requestAnimationFrame(gameLoop);   // 确保游戏循环启动
+            requestAnimationFrame(gameLoop);
         });
 
         // 游戏循环
-        let lastTime = 0;
         function gameLoop(timestamp) {
             if (!gameStarted || !gameLoopRunning) {
-                gameLoopRunning = false; //新增这行
-                requestAnimationFrame(gameLoop);
                 return;
             }
             
             const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
             
-            // 移动玩家
             if ((keys.ArrowUp || keys.up) && playerY > 15) playerY -= playerSpeed;
             if ((keys.ArrowDown || keys.down) && playerY < gameHeight - 15) playerY += playerSpeed;
             if ((keys.ArrowLeft || keys.left) && playerX > 15) playerX -= playerSpeed;
@@ -1669,11 +1610,9 @@
             checkCollisions();
             magnetEffect();
             moveEnemies(deltaTime);
-
-            if (gameStarted && gameLoopRunning) {  // 修改这行
-            requestAnimationFrame(gameLoop)
-            }else {
-                gameLoopRunning = false; // 新增这行;
+            
+            if (gameStarted && gameLoopRunning) {
+                requestAnimationFrame(gameLoop);
             }
         }
 
