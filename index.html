@@ -807,6 +807,9 @@
                 speed: false,
                 magnet: false
             };
+            // 确保游戏循环状态正确（新增这部分）
+            gameLoopRunning = true;
+            lastTime = performance.now();
 
             // 重置游戏循环（新增这部分）
             lastTime = 0;
@@ -1634,16 +1637,20 @@
         });
 
         // 开始游戏按钮
-        startButton.addEventListener('click', () => {
+        startButton.addEventListener('click', (e) => {
+            e.preventDefault();
             welcomeModal.style.display = 'none';
             gameStarted = true;
+            gameLoopRunning = true;  // 新增这行
+            lastTime = performance.now();  // 新增这行
             initGame();
+            requestAnimationFrame(gameLoop);   // 确保游戏循环启动
         });
 
         // 游戏循环
         let lastTime = 0;
         function gameLoop(timestamp) {
-            if (!gameStarted) {
+            if (!gameStarted || !gameLoopRunning) {
                 gameLoopRunning = false; //新增这行
                 requestAnimationFrame(gameLoop);
                 return;
@@ -1663,7 +1670,7 @@
             magnetEffect();
             moveEnemies(deltaTime);
 
-            if (gameStarted) {  // 修改这行
+            if (gameStarted && gameLoopRunning) {  // 修改这行
             requestAnimationFrame(gameLoop)
             }else {
                 gameLoopRunning = false; // 新增这行;
