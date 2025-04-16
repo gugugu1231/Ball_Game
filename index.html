@@ -744,6 +744,8 @@
         const downBtn = document.getElementById('downBtn');
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
+        let gameLoopRunning = false;  // 新增这行
+        let lastTime = 0;
         
         // 控制变量
         let playerX = 50;
@@ -805,7 +807,13 @@
                 speed: false,
                 magnet: false
             };
-            
+
+            // 重置游戏循环（新增这部分）
+            lastTime = 0;
+            if (!gameLoopRunning) {
+            gameLoopRunning = true;
+            requestAnimationFrame(gameLoop);
+            }
             updatePlayerPosition();
             updateHealthDisplay();
             updateScoreDisplay();
@@ -878,6 +886,7 @@
             gameOverScreen.style.display = 'flex';
             clearInterval(timerInterval);
             gameStarted = false;
+            gameLoopRunning = false;
         }
         
         // 开始计时器
@@ -1603,6 +1612,12 @@
             gameOverScreen.style.display = 'none';
             gameStarted = true;
             initGame();
+        // 确保游戏循环启动
+        if (!gameLoopRunning) {
+        gameLoopRunning = true;
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+        }
         });
         
         restartButton2.addEventListener('click', (e) => {
@@ -1610,6 +1625,12 @@
             finalScreen.style.display = 'none';
             gameStarted = true;
             initGame();
+         // 确保游戏循环启动
+        if (!gameLoopRunning) {
+        gameLoopRunning = true;
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+        }
         });
 
         // 开始游戏按钮
@@ -1623,6 +1644,7 @@
         let lastTime = 0;
         function gameLoop(timestamp) {
             if (!gameStarted) {
+                gameLoopRunning = false; //新增这行
                 requestAnimationFrame(gameLoop);
                 return;
             }
@@ -1640,8 +1662,12 @@
             checkCollisions();
             magnetEffect();
             moveEnemies(deltaTime);
-            
-            requestAnimationFrame(gameLoop);
+
+            if (gameStarted) {  // 修改这行
+            requestAnimationFrame(gameLoop)
+            }else {
+                gameLoopRunning = false; // 新增这行;
+            }
         }
 
         // 初始化游戏循环
