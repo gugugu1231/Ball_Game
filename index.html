@@ -1459,7 +1459,7 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance > 0) {
-                    const speed = 1.5 + currentLevel * 0.2; // 敌人速度随关卡增加
+                    const speed = 0.9 + currentLevel * 0.1; // 敌人速度随关卡增加
                     const vx = (dx / distance) * speed;
                     const vy = (dy / distance) * speed;
                     
