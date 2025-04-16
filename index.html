@@ -1399,24 +1399,39 @@
             
             // 检测墙碰撞
             for (let i = 0; i < walls.length; i++) {
-                const wall = walls[i];
-                
-                // 简单的矩形碰撞检测
-                if (playerX + 16 > wall.x && 
-                    playerX - 16 < wall.x + wall.width && 
-                    playerY + 16 > wall.y && 
-                    playerY - 16 < wall.y + wall.height) {
-                    
-                    // 从墙中推出玩家
-                    const centerX = wall.x + wall.width / 2;
-                    const centerY = wall.y + wall.height / 2;
-                    const angle = Math.atan2(playerY - centerY, playerX - centerX);
-                    
-                    playerX = centerX + Math.cos(angle) * (wall.width / 2 + 16);
-                    playerY = centerY + Math.sin(angle) * (wall.height / 2 + 16);
-                    updatePlayerPosition();
+            const wall = walls[i];
+        
+        // 更精确的矩形碰撞检测
+            if (playerX + 16 > wall.x && 
+                playerX - 16 < wall.x + wall.width && 
+                playerY + 16 > wall.y && 
+                playerY - 16 < wall.y + wall.height) {
+            
+            // 计算玩家到墙中心的向量
+            const wallCenterX = wall.x + wall.width / 2;
+            const wallCenterY = wall.y + wall.height / 2;
+            const dx = playerX - wallCenterX;
+            const dy = playerY - wallCenterY;
+            
+            // 确定从哪个方向推出玩家
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // 水平方向推出
+                if (dx > 0) {
+                    playerX = wall.x + wall.width + 16;
+                } else {
+                    playerX = wall.x - 16;
+                }
+            } else {
+                // 垂直方向推出
+                if (dy > 0) {
+                    playerY = wall.y + wall.height + 16;
+                } else {
+                    playerY = wall.y - 16;
                 }
             }
+            updatePlayerPosition();
+        }
+    }
             
             // 检测敌人碰撞
             for (let i = 0; i < enemies.length; i++) {
@@ -1583,13 +1598,15 @@
         });
 
         // 重新开始按钮
-        restartButton1.addEventListener('click', () => {
+        restartButton1.addEventListener('click', (e) => {
+            e.preventDefault();
             gameOverScreen.style.display = 'none';
             gameStarted = true;
             initGame();
         });
         
-        restartButton2.addEventListener('click', () => {
+        restartButton2.addEventListener('click', (e) => {
+            e.preventDefault();
             finalScreen.style.display = 'none';
             gameStarted = true;
             initGame();
