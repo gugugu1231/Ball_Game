@@ -299,7 +299,7 @@
         }
         #helpButton {
             position: absolute;
-            bottom: 20px;
+            bottom: 90px;
             right: 20px;
             width: 50px;
             height: 50px;
@@ -1595,11 +1595,12 @@
         startButton.addEventListener('click', (e) => {
             e.preventDefault();
             welcomeModal.style.display = 'none';
-            gameStarted = true;
-            gameLoopRunning = true;
-            lastTime = performance.now();
             initGame();
-            requestAnimationFrame(gameLoop);
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
         });
 
         // 游戏循环
