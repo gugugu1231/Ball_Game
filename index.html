@@ -823,6 +823,10 @@
                 ArrowDown: false,
                 ArrowLeft: false,
                 ArrowRight: false,
+                w: false,
+                s: false,
+                a: false,
+                d: false,
                 up: false,
                 down: false,
                 left: false,
@@ -830,6 +834,7 @@
             };
             
             // 确保游戏循环状态正确
+            gameStarted = true;
             gameLoopRunning = true;
             lastTime = performance.now();
             
@@ -838,6 +843,13 @@
             gameOverScreen.style.display = 'none';
             finalScreen.style.display = 'none';
             levelComplete.style.display = 'none';
+            helpModal.style.display = 'none';
+            
+            // 重新启动游戏循环
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                requestAnimationFrame(gameLoop);
+            }
         }
         
         // 更新生命值显示
@@ -1560,7 +1572,6 @@
         restartButton1.addEventListener('click', (e) => {
             e.preventDefault();
             gameOverScreen.style.display = 'none';
-            gameStarted = true;
             initGame();
             if (!gameLoopRunning) {
                 gameLoopRunning = true;
@@ -1572,7 +1583,6 @@
         restartButton2.addEventListener('click', (e) => {
             e.preventDefault();
             finalScreen.style.display = 'none';
-            gameStarted = true;
             initGame();
             if (!gameLoopRunning) {
                 gameLoopRunning = true;
